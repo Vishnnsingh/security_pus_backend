@@ -1,0 +1,40 @@
+{
+  "name": "security-plus-admin-be",
+  "version": "1.0.0",
+  "description": "admin panel of security plus",
+  "type": "module",
+  "main": "index.js",
+  "scripts": {
+    "dev": "nodemon src/index.js",
+    "auto-import": "node src/scripts/autoImport.js",
+    "watch-sync": "node src/scripts/watchAndSync.js",
+    "start": "node src/index.js",
+    "seed:products": "node src/scripts/seedProductsFromDataJson.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Bluparrot/security-plus-admin-BE.git"
+  },
+  "keywords": [
+    "javascript",
+    "backend"
+  ],
+  "author": "bhoomika",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Bluparrot/security-plus-admin-BE/issues"
+  },
+  "homepage": "https://github.com/Bluparrot/security-plus-admin-BE#readme",
+  "devDependencies": {
+    "nodemon": "^3.1.10"
+  },
+  "dependencies": {
+    "bcryptjs": "^3.0.2",
+    "cors": "^2.8.5",
+    "dotenv": "^17.2.3",
+    "express": "^5.1.0",
+    "express-validator": "^7.3.0",
+    "jsonwebtoken": "^9.0.2",
+    "mongoose": "^8.19.1"
+  }
+}
