@@ -17,10 +17,16 @@ const allowedOrigins = [
   'http://localhost:3000',
   'http://localhost:8000',
   'http://localhost:5173',
+  'http://localhost:5174',
   'https://localhost:5173',
+  'https://localhost:5174',
   'https://securityplusuniform.com',
   'https://securityplusuniform.com/'
 ];
+
+// Allow all localhost ports for development (flexible for any port)
+allowedOrigins.push(/^http:\/\/localhost:\d+$/);
+allowedOrigins.push(/^https:\/\/localhost:\d+$/);
 
 // Add Vercel deployment URLs automatically
 if (process.env.VERCEL_URL) {
