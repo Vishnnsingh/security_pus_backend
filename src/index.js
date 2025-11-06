@@ -22,6 +22,21 @@ const allowedOrigins = [
   'https://securityplusuniform.com/'
 ];
 
+// Add Vercel deployment URLs automatically
+if (process.env.VERCEL_URL) {
+  allowedOrigins.push(`https://${process.env.VERCEL_URL}`);
+}
+
+// Add custom Vercel domain if set
+if (process.env.VERCEL_CUSTOM_DOMAIN) {
+  allowedOrigins.push(`https://${process.env.VERCEL_CUSTOM_DOMAIN}`);
+}
+
+// Allow all Vercel preview deployments (for development/testing)
+if (process.env.VERCEL_ENV === 'preview' || process.env.VERCEL_ENV === 'development') {
+  allowedOrigins.push(/^https:\/\/.*\.vercel\.app$/);
+}
+
 if (process.env.CORS_ORIGINS) {
   allowedOrigins.push(
     ...process.env.CORS_ORIGINS.split(',')
@@ -32,12 +47,19 @@ if (process.env.CORS_ORIGINS) {
 
 const corsOptions = {
   origin: (origin, callback) => {
+    // Allow requests with no origin (like mobile apps, Postman, etc.)
     if (!origin) {
       return callback(null, true);
     }
 
     const normalizedOrigin = origin.endsWith('/') ? origin.slice(0, -1) : origin;
+    
+    // Check if origin matches any allowed origin (including regex patterns)
     const isAllowed = allowedOrigins.some(allowed => {
+      // Handle regex patterns (for Vercel preview URLs)
+      if (allowed instanceof RegExp) {
+        return allowed.test(normalizedOrigin);
+      }
       const normalizedAllowed = allowed.endsWith('/') ? allowed.slice(0, -1) : allowed;
       return normalizedAllowed === normalizedOrigin;
     });
@@ -46,6 +68,8 @@ const corsOptions = {
       return callback(null, true);
     }
 
+    // Log blocked origins for debugging
+    console.log(`CORS blocked origin: ${origin}`);
     return callback(new Error('Not allowed by CORS'));
   },
   credentials: true,
@@ -131,10 +155,18 @@ app.use((req, res) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Security Plus Admin API running on port ${PORT}`);
-  console.log(`📊 Auto MongoDB converter ready`);
-  console.log(`🔗 API Documentation: http://localhost:${PORT}`);
-  console.log(`📁 Auto-import: npm run auto-import`);
-  console.log(`👀 Watch sync: npm run watch-sync`);
-});
+// Start server only in local development
+// Vercel will use the exported app directly (serverless function)
+// Listen only if not running on Vercel
+if (!process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`🚀 Security Plus Admin API running on port ${PORT}`);
+    console.log(`📊 Auto MongoDB converter ready`);
+    console.log(`🔗 API Documentation: http://localhost:${PORT}`);
+    console.log(`📁 Auto-import: npm run auto-import`);
+    console.log(`👀 Watch sync: npm run watch-sync`);
+  });
+}
+
+// Export app for Vercel serverless functions
+export default app;
