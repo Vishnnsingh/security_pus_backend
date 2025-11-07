@@ -26,6 +26,17 @@ router.post('/', async (req, res) => {
 
     const productData = { ...payload };
 
+    if (Array.isArray(productData.features)) {
+      productData.features = productData.features
+        .map((feature) => (typeof feature === 'string' ? feature.trim() : ''))
+        .filter(Boolean);
+    } else if (typeof productData.features === 'string') {
+      productData.features = productData.features
+        .split('\n')
+        .map((feature) => feature.trim())
+        .filter(Boolean);
+    }
+
     const price = parseNumber(productData.price);
     if (price !== undefined) {
       productData.price = price;
@@ -178,6 +189,17 @@ router.put('/:id', async (req, res) => {
 
     const payload = req.body || {};
     const updates = { ...payload };
+
+    if (Array.isArray(updates.features)) {
+      updates.features = updates.features
+        .map((feature) => (typeof feature === 'string' ? feature.trim() : ''))
+        .filter(Boolean);
+    } else if (typeof updates.features === 'string') {
+      updates.features = updates.features
+        .split('\n')
+        .map((feature) => feature.trim())
+        .filter(Boolean);
+    }
 
     const price = parseNumber(updates.price);
     if (price !== undefined) {

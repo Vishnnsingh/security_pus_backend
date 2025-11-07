@@ -66,6 +66,12 @@ const productSchema = new mongoose.Schema(
       type: Boolean,
       default: false
     },
+    features: [
+      {
+        type: String,
+        trim: true
+      }
+    ],
     thumbnail: imageSchema,
     images: [imageSchema],
     specifications: {
