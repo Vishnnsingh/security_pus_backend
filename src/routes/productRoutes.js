@@ -4,6 +4,10 @@ import Product from '../models/Product.js';
 
 const router = express.Router();
 
+const escapeRegex = (value = '') => {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+};
+
 const parseNumber = (value) => {
   if (value === undefined || value === null || value === '') {
     return undefined;
@@ -137,6 +141,49 @@ router.get('/', async (req, res) => {
     res.status(500).json({
       success: false,
       message: 'Failed to fetch products',
+      error: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
+  }
+});
+
+router.get('/brands', async (req, res) => {
+  try {
+    const { category, subcategory } = req.query;
+
+    const filters = {};
+
+    if (category && category !== 'all') {
+      const normalizedCategory = category.trim();
+      if (normalizedCategory) {
+        filters.category = {
+          $regex: new RegExp(`^${escapeRegex(normalizedCategory)}$`, 'i')
+        };
+      }
+    }
+
+    if (subcategory && subcategory !== 'all') {
+      filters.$or = [
+        { subCategory: subcategory },
+        { subcategory: subcategory }
+      ];
+    }
+
+    const brands = await Product.distinct('brand', filters);
+    const cleanBrands = brands
+      .filter((brand) => typeof brand === 'string' && brand.trim().length > 0)
+      .map((brand) => brand.trim())
+      .sort((a, b) => a.localeCompare(b));
+
+    res.json({
+      success: true,
+      data: cleanBrands
+    });
+  } catch (error) {
+    console.error('Product brands fetch error:', error);
+
+    res.status(500).json({
+      success: false,
+      message: 'Failed to load brands',
       error: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
